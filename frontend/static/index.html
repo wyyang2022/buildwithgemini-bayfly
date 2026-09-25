@@ -116,7 +116,12 @@ function buildNode(id, comps, seen) {
       const hint = String(props.usageHint || "body").toLowerCase();
       if (["h1", "h2", "h3", "h4", "h5", "h6"].includes(hint)) t.classList.add("a2-" + hint);
       else if (hint === "caption") t.classList.add("a2-caption");
-      t.textContent = boundStr(props.text);
+      const rawText = boundStr(props.text);
+      if (rawText && /(https?:\/\/[^\s]+)/.test(rawText)) {
+        t.innerHTML = rawText.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" style="color:#1a73e8; text-decoration:underline;">$1</a>');
+      } else {
+        t.textContent = rawText;
+      }
       return t;
     }
     case "Divider":

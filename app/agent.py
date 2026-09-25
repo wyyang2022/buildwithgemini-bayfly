@@ -410,13 +410,24 @@ def search_google_flights(
                 "layover_count": layovers,
                 "departure_time": first_leg.get("departure_airport", {}).get("time"),
                 "arrival_time": flights_list[-1].get("arrival_airport", {}).get("time"),
+                "booking_link": (
+                    f"https://www.google.com/travel/flights?q=Flights%20to%20{arr_airport}%20from%20{dep_airport}"
+                    f"%20on%20{outbound_date}" + (f"%20through%20{return_date}" if return_date else "")
+                ),
             })
+
+        overall_search_url = data.get("search_metadata", {}).get("google_flights_url") or (
+            f"https://www.google.com/travel/flights?q=Flights%20to%20{arrival_id}%20from%20{departure_ids}"
+            f"%20on%20{outbound_date}" + (f"%20through%20{return_date}" if return_date else "")
+        )
 
         return {
             "status": "success",
             "source": "Google Flights (via SerpApi)",
             "outbound_date": outbound_date,
+            "return_date": return_date,
             "destination": arrival_id,
+            "google_flights_booking_url": overall_search_url,
             "flights_found": len(formatted_flights),
             "flights": formatted_flights,
         }
@@ -542,6 +553,7 @@ if _HAS_A2UI_SDK:
             "Tailor your recommendations based on whether the trip is for business (prioritize non-stop, early schedules, Wi-Fi, and low delay risk) "
             "or leisure (prioritize total price, value, and baggage flexibility). "
             "For flight data: use search_google_flights to query live Google Flights if available; otherwise use search_flights to query Firestore. "
+            "When presenting flight options, always include the flight booking link or the Google Flights booking URL so travelers can directly book or view the flights on Google Flights. "
             "Use save_flight_route to save new routes, "
             "calculate_total_trip_cost to provide the true door-to-door trip cost (airfare + parking or rideshare + tolls), "
             "get_airport_weather to check real-time weather, wind, and delay risks (especially SFO fog vs SJC/OAK conditions), "
